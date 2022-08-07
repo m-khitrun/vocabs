@@ -1,0 +1,30 @@
+DO
+$body$
+    DECLARE
+        update text;
+    BEGIN
+        SELECT TO_CHAR(CURRENT_DATE, 'YYYY_MM_DD')
+        INTO update;
+        EXECUTE FORMAT('create table %I as select * from concept_relationship_manual',
+                       'concept_relationship_manual_backup_' || update);
+
+    END
+$body$;
+
+--restore concept_relationship_manual table (run it only if something went wrong)
+/*TRUNCATE TABLE dev_loinc.concept_relationship_manual;
+INSERT INTO dev_loinc.concept_relationship_manual
+SELECT * FROM dev_loinc.concept_relationship_manual_backup_YYYY_MM_DD;*/
+
+DO
+$body$
+    DECLARE
+        update text;
+    BEGIN
+        SELECT TO_CHAR(CURRENT_DATE, 'YYYY_MM_DD')
+        INTO update;
+        EXECUTE FORMAT('create table %I as select * from concept_manual',
+                       'concept_manual_backup_' || update);
+
+    END
+$body$;
