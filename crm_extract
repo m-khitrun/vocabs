@@ -1,0 +1,36 @@
+--One time executed code to run and take concepts from concept_relationship_manual
+--TODO: There are a lot of non-deprecated relationships to non-standard (in dev_loinc) concepts.
+--! Not anymore
+-- Bring the list to the manual file.
+-- There should be a check that force us to manually fix the manual file (even before running the 1st query to get the delta).
+-- So once the concept is in the manual file, it should NOT appear in delta. Basically this is "check if target concepts are Standard and exist in the concept table"
+-- Once the relationship to the specific target concept is gone, the machinery should make it D in CRM using the current_date.
+SELECT DISTINCT
+       replace (c.concept_name, 'Deprecated ', '') AS source_concept_name_clean,
+       c.concept_name AS source_concept_name,
+       c.concept_code AS source_concept_code,
+       c.concept_class_id AS   source_concept_class_id,
+       c.invalid_reason AS     source_invalid_reason,
+       c.domain_id AS          source_domain_id,
+
+       crm.relationship_id AS relationship_id,
+
+       'CRM' AS flag,
+       cc.concept_id AS target_concept_id,
+       cc.concept_code AS target_concept_code,
+       cc.concept_name AS target_concept_name,
+       cc.concept_class_id AS target_concept_class_id,
+       cc.standard_concept AS target_standard_concept,
+       cc.invalid_reason AS target_invalid_reason,
+       cc.domain_id AS target_domain_id,
+       cc.vocabulary_id AS target_vocabulary_id
+
+FROM dev_cpt4.concept_relationship_manual crm
+JOIN dev_cpt4.concept c ON c.concept_code = crm.concept_code_1 AND c.vocabulary_id = 'CPT4'  AND crm.invalid_reason IS NULL
+JOIN dev_cpt4.concept cc ON cc.concept_code = crm.concept_code_2 AND cc.vocabulary_id = crm.vocabulary_id_2
+
+ORDER BY replace (c.concept_name, 'Deprecated ', ''),
+         c.concept_code,
+         crm.relationship_id,
+         cc.concept_id
+;
